@@ -91,12 +91,19 @@ stages:
         inlineScript: |
           az aks get-credentials --resource-group MultiAgentDataVisual --name Multiagent_AKS --overwrite-existing
     - script: |
+    
         mkdir -p $HOME/.local/bin
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
         chmod +x kubectl
         mv kubectl $HOME/.local/bin/
         echo "##vso[task.setvariable variable=PATH]$HOME/.local/bin:$PATH"
       displayName: 'Install kubectl (user local bin)'
+    - script: |
+        mkdir -p $HOME/.local/bin
+        curl -Lo $HOME/.local/bin/kubelogin https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-linux-amd64
+        chmod +x $HOME/.local/bin/kubelogin
+        echo "##vso[task.setvariable variable=PATH]$HOME/.local/bin:$PATH"
+      displayName: 'Install kubelogin'
     - script: |
         kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-deployment.yaml
         kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-service.yaml
