@@ -46,9 +46,9 @@ stages:
         buildType: 'current'
         artifactName: 'manifests'
         itemPattern: '**/*.yaml'
-        targetPath: '$(System.ArtifactsDirectory)/manifests'
+        targetPath: '$(System.ArtifactsDirectory)'
 
-    - script: ls -lR $(System.ArtifactsDirectory)/manifests
+    - script: ls -lR $(System.ArtifactsDirectory)
       displayName: 'List downloaded manifests'
 
     - task: AzureCLI@2
