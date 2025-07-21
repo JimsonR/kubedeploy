@@ -91,11 +91,11 @@ stages:
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-deployment.yaml"
+            --command "kubectl apply -f $(System.ArtifactsDirectory)/manifests/azmcpserver-deployment.yaml"
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-service.yaml"
+            --command "kubectl apply -f $(System.ArtifactsDirectory)/manifests/azmcpserver-service.yaml"
 
     - task: AzureCLI@2
       displayName: 'Deploy mcp-client'
@@ -107,11 +107,11 @@ stages:
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-deployment.yaml"
+            --command "kubectl apply -f $(System.ArtifactsDirectory)/manifests/mcp-client-deployment.yaml"
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-service.yaml"
+            --command "kubectl apply -f $(System.ArtifactsDirectory)/manifests/mcp-client-service.yaml"
 
     - task: AzureCLI@2
       displayName: 'Deploy mcp-frontend'
@@ -123,8 +123,8 @@ stages:
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-deployment.yaml"
+            --command "kubectl apply -f $(System.ArtifactsDirectory)/manifests/mcp-frontend-deployment.yaml"
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-service.yaml"
+            --command "kubectl apply -f $(System.ArtifactsDirectory)/manifests/mcp-frontend-service.yaml"
