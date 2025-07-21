@@ -58,28 +58,28 @@ stages:
           echo "Looking for manifests folder:"
           ls -la "$(System.ArtifactsDirectory)/manifests" || echo "manifests folder not found"
 
-    - task: AzureCLI@2
-      displayName: 'Create/Update Kubernetes Namespace and Secrets'
-      inputs:
-        azureSubscription: 'kubernetes-service-connection' # <-- Replace with your Azure Resource Manager connection name
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          az aks command invoke \
-            --resource-group MultiAgentDataVisual \
-            --name Multiagent_AKS \
-            --command "kubectl create namespace $(k8sNamespace) --dry-run=client -o yaml | kubectl apply -f -"
-          az aks command invoke \
-            --resource-group MultiAgentDataVisual \
-            --name Multiagent_AKS \
-            --command "kubectl create secret generic azure-sql-secret -n $(k8sNamespace) --from-literal=password=$AZURE_SQL_PASSWORD --dry-run=client -o yaml | kubectl apply -f -"
-          az aks command invoke \
-            --resource-group MultiAgentDataVisual \
-            --name Multiagent_AKS \
-            --command "kubectl create secret generic azure-openai-secret -n $(k8sNamespace) --from-literal=api-key=$AZURE_OPENAI_API_KEY --dry-run=client -o yaml | kubectl apply -f -"
-      env:
-        AZURE_SQL_PASSWORD: $(AZURE_SQL_PASSWORD)
-        AZURE_OPENAI_API_KEY: $(AZURE_OPENAI_API_KEY)
+    # - task: AzureCLI@2
+    #   displayName: 'Create/Update Kubernetes Namespace and Secrets'
+    #   inputs:
+    #     azureSubscription: 'kubernetes-service-connection' # <-- Replace with your Azure Resource Manager connection name
+    #     scriptType: 'bash'
+    #     scriptLocation: 'inlineScript'
+    #     inlineScript: |
+    #       az aks command invoke \
+    #         --resource-group MultiAgentDataVisual \
+    #         --name Multiagent_AKS \
+    #         --command "kubectl create namespace $(k8sNamespace) --dry-run=client -o yaml | kubectl apply -f -"
+    #       az aks command invoke \
+    #         --resource-group MultiAgentDataVisual \
+    #         --name Multiagent_AKS \
+    #         --command "kubectl create secret generic azure-sql-secret -n $(k8sNamespace) --from-literal=password=$AZURE_SQL_PASSWORD --dry-run=client -o yaml | kubectl apply -f -"
+    #       az aks command invoke \
+    #         --resource-group MultiAgentDataVisual \
+    #         --name Multiagent_AKS \
+    #         --command "kubectl create secret generic azure-openai-secret -n $(k8sNamespace) --from-literal=api-key=$AZURE_OPENAI_API_KEY --dry-run=client -o yaml | kubectl apply -f -"
+    #   env:
+    #     AZURE_SQL_PASSWORD: $(AZURE_SQL_PASSWORD)
+    #     AZURE_OPENAI_API_KEY: $(AZURE_OPENAI_API_KEY)
 
     - task: AzureCLI@2
       displayName: 'Deploy azmcpserver'
@@ -88,6 +88,7 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
+          ls $(System.ArtifactsDirectory)
           MANIFEST_PATH="$(System.ArtifactsDirectory)"
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
