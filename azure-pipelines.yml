@@ -89,7 +89,9 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           az aks get-credentials --resource-group MultiAgentDataVisual --name Multiagent_AKS --overwrite-existing
-
+    - script: |
+        az aks install-cli
+      displayName: 'Install kubectl'
     - script: |
         kubectl apply -f $(System.ArtifactsDirectory)/manifests/azmcpserver-deployment.yaml
         kubectl apply -f $(System.ArtifactsDirectory)/manifests/azmcpserver-service.yaml
