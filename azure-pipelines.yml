@@ -1,0 +1,112 @@
+# trigger:
+# - main
+# Stage 1
+# Build docker image 
+# Publish the K8S Files
+
+resources:
+- repo: self
+
+variables:
+  tag:  'latest'
+  azmcpserverImage: 'eswarchivatam/azmcpserver:$(tag)'
+  mcpclientImage:  'eswarchivatam/mcpclient:$(tag)'
+  mcpfrontendImage: 'eswarchivatam/mcpfrontend:$(tag)'
+  k8sNamespace: 'default'
+
+stages:
+- stage: KubernetesManifests
+  displayName: Copy Manifests
+  jobs:
+  - job: KubernetesManifestsCopy
+    displayName: Copy kubernetes manifests
+    pool:
+      vmImage: ubuntu-latest
+      # name: Test Agent
+    steps:
+      - task: CopyFiles@2
+        displayName: 'Copy Kubernetes Manifests'
+        inputs:
+          SourceFolder: '$(System.DefaultWorkingDirectory)'
+          Contents: '**/*.yaml'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/manifests'
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Manifests'
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: 'manifests'
+          publishLocation: 'Container'  # Stage 1 is done 
+          
+- stage: Deploy
+  displayName: Deploy image
+  jobs:
+  - job: Deploy
+    displayName: Deploy
+    pool:
+      vmImage: ubuntu-latest
+      # name: Test Agent
+    steps:  
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download Manifests'
+      inputs:
+        buildType: 'current'
+        artifactName: 'manifests'
+        itemPattern: '**/*.yaml'
+        targetPath: '$(System.ArtifactsDirectory)/manifests'
+
+
+    - task: KubernetesManifest@1
+      displayName: 'Deploy azmcpserver'
+      inputs:
+        action: 'deploy'
+        connectionType: 'kubernetesServiceConnection'
+        kubernetesServiceConnection: 'az'
+        namespace: '$(k8sNamespace)'
+        manifests: '$(System.ArtifactsDirectory)/manifests/backend-*.yaml'
+        containers: '$(backendImage)'
+
+
+        # secretArguments: |
+        #   --set secrets.azureStorageKey=$(AZURE_STORAGE_KEY) \
+        #   --set secrets.azureCosmosKey=$(AZURE_COSMOS_KEY)
+            # Verification Step
+    # - task: Bash@3
+    #   displayName: 'Verify Backend'
+    #   inputs:
+    #     targetType: 'inline'
+    #     script: |
+    #       echo "Checking backend status..."
+    #       kubectl get pods -l app=ssgenerals-backend -o wide
+    #       kubectl logs -l app=ssgenerals-backend --tail=50
+    #       echo "Proceeding with deployment..."
+    - task: KubernetesManifest@1
+      displayName: 'Deploy frontend'
+      inputs:
+        action: 'deploy'
+        connectionType: 'kubernetesServiceConnection'
+        kubernetesServiceConnection: 'azure-kubernetes-ssgenerals-connenction'
+        namespace: '$(k8sNamespace)'
+        manifests: '$(System.ArtifactsDirectory)/manifests/frontend-*.yaml'
+        containers: '$(frontendImage)'
+        arguments: '--timeout=300s'
+
+    # Get Frontend Service URL
+    # - task: Bash@3
+    #   displayName: 'Get Frontend URL'
+    #   inputs:
+    #     targetType: 'inline'
+    #     script: |
+    #       kubectl get svc frontend -n $(k8sNamespace) -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+    #       echo "##vso[task.setvariable variable=frontendUrl]http://$(kubectl get svc frontend -n $(k8sNamespace) -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+    
+    #       # Output the Frontend URL
+    #       - script: echo "Frontend is available at: $(frontendUrl)"
+    #         displayName: 'Display Frontend URL'
+
+
+# Stage 2
+# Build docker image 
+# Deploy to K8S Cluster with Docker Image
+
+
+
