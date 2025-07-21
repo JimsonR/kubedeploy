@@ -57,13 +57,7 @@ stages:
           ls -la "$(System.ArtifactsDirectory)"
           echo "Looking for manifests folder:"
           ls -la "$(System.ArtifactsDirectory)/manifests" || echo "manifests folder not found"
-          - script: |
-            mkdir -p $HOME/.local/bin
-            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-            chmod +x kubectl
-            mv kubectl $HOME/.local/bin/
-            echo "##vso[task.setvariable variable=PATH]$HOME/.local/bin:$PATH"
-          displayName: 'Install kubectl (user local bin)'
+
 
     - task: AzureCLI@2
       displayName: 'Create/Update Kubernetes Namespace and Secrets'
@@ -96,7 +90,13 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           az aks get-credentials --resource-group MultiAgentDataVisual --name Multiagent_AKS --overwrite-existing
-
+    - script: |
+        mkdir -p $HOME/.local/bin
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        mv kubectl $HOME/.local/bin/
+        echo "##vso[task.setvariable variable=PATH]$HOME/.local/bin:$PATH"
+      displayName: 'Install kubectl (user local bin)'
     - script: |
         kubectl apply -f $(System.ArtifactsDirectory)/manifests/azmcpserver-deployment.yaml
         kubectl apply -f $(System.ArtifactsDirectory)/manifests/azmcpserver-service.yaml
