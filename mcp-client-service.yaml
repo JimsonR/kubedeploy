@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-client-service
+  namespace: mcp-app
+  labels:
+    app: mcp-client
+spec:
+  selector:
+    app: mcp-client
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  type: ClusterIP

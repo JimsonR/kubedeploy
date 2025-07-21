@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: azmcpserver
+  namespace: mcp-app
+  labels:
+    app: azmcpserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: azmcpserver
+  template:
+    metadata:
+      labels:
+        app: azmcpserver
+    spec:
+      containers:
+      - name: azmcpserver
+        image: azdbmcpserver
+        ports:
+        - containerPort: 8005
+        env:
+        - name: AZURE_SQL_SERVER
+          value: "multiagentsqlserver.database.windows.net"
+        - name: AZURE_SQL_DATABASE
+          value: "AdventureWorks2022"
+        - name: AZURE_SQL_USERNAME
+          value: "multiagentadmin@multiagentsqlserver"
+        - name: AZURE_SQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: azure-sql-secret
+              key: password
+        - name: AZURE_SQL_DRIVER
+          value: "{ODBC Driver 17 for SQL Server}"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"

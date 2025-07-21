@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-client
+  namespace: mcp-app
+  labels:
+    app: mcp-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp-client
+  template:
+    metadata:
+      labels:
+        app: mcp-client
+    spec:
+      containers:
+      - name: mcp-client
+        image: mcpclient
+        ports:
+        - containerPort: 8080
+        env:
+        - name: AZURE_OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: azure-openai-secret
+              key: api-key
+        - name: AZURE_OPENAI_ENDPOINT
+          value: "https://chb-az-openai.openai.azure.com/"
+        - name: AZURE_OPENAI_DEPLOYMENT_NAME
+          value: "gpt-4o"
+        - name: AZURE_OPENAI_API_VERSION
+          value: "2024-02-15-preview"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

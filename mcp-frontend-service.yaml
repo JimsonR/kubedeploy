@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-frontend-service
+  namespace: mcp-app
+  labels:
+    app: mcp-frontend
+spec:
+  selector:
+    app: mcp-frontend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  type: LoadBalancer  # Exposed externally like port 80 in Docker
