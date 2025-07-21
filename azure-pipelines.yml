@@ -8,7 +8,7 @@ variables:
   azmcpserverImage: 'eswarchivatam/azmcpserver:$(tag)'
   mcpclientImage:  'eswarchivatam/mcpclient:$(tag)'
   mcpfrontendImage: 'eswarchivatam/mcpfrontend:$(tag)'
-  k8sNamespace: 'mcp-app'
+  k8sNamespace: 'default'
 
 stages:
 - stage: KubernetesManifests
