@@ -1,14 +1,12 @@
 trigger:
   - main
-resources:
-  - repo: self
 
 variables:
   tag:  'latest'
   azmcpserverImage: 'eswarchivatam/azmcpserver:$(tag)'
   mcpclientImage:  'eswarchivatam/mcpclient:$(tag)'
   mcpfrontendImage: 'eswarchivatam/mcpfrontend:$(tag)'
-  k8sNamespace: 'default'
+  k8sNamespace: 'mcp-app'
 
 stages:
 - stage: KubernetesManifests
@@ -17,7 +15,7 @@ stages:
   - job: KubernetesManifestsCopy
     displayName: Copy kubernetes manifests
     pool:
-      name: default
+      vmImage: ubuntu-latest
     steps:
       - task: CopyFiles@2
         displayName: 'Copy Kubernetes Manifests'
@@ -38,7 +36,7 @@ stages:
   - job: Deploy
     displayName: Deploy
     pool:
-      name: default
+      vmImage: ubuntu-latest
     steps:
     - task: DownloadPipelineArtifact@2
       displayName: 'Download Manifests'
@@ -48,13 +46,22 @@ stages:
         itemPattern: '**/*.yaml'
         targetPath: '$(System.ArtifactsDirectory)'
 
-    - script: ls -lR $(System.ArtifactsDirectory)
-      displayName: 'List downloaded manifests'
+    - task: AzureCLI@2
+      displayName: 'Debug - List Downloaded Files'
+      inputs:
+        azureSubscription: 'kubernetes-service-connection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo "Contents of $(System.ArtifactsDirectory):"
+          ls -la "$(System.ArtifactsDirectory)"
+          echo "Looking for manifests folder:"
+          ls -la "$(System.ArtifactsDirectory)/manifests" || echo "manifests folder not found"
 
     - task: AzureCLI@2
       displayName: 'Create/Update Kubernetes Namespace and Secrets'
       inputs:
-        azureSubscription: 'kubernetes-service-connection'
+        azureSubscription: 'kubernetes-service-connection' # <-- Replace with your Azure Resource Manager connection name
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
@@ -121,15 +128,3 @@ stages:
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
             --command "kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-service.yaml"
-    - task: AzureCLI@2
-      displayName: 'Get Frontend Service External IP'
-      inputs:
-        azureSubscription: 'kubernetes-service-connection'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          az aks command invoke \
-            --resource-group MultiAgentDataVisual \
-            --name Multiagent_AKS \
-            --command "kubectl get svc mcp-frontend-service -n $(k8sNamespace) -o jsonpath='{.status.loadBalancer.ingress[0].ip}'" \
-            --query 'logs' -o tsv
