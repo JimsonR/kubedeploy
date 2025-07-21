@@ -1,5 +1,7 @@
-# trigger:
-#   - main
+trigger:
+  - main
+resources:
+  - repo: self
 
 variables:
   tag:  'latest'
