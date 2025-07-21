@@ -98,36 +98,36 @@ stages:
             --name Multiagent_AKS \
             --command "kubectl apply -f $MANIFEST_PATH/azmcpserver-service.yaml"
 
-    - task: AzureCLI@2
-      displayName: 'Deploy mcp-client'
-      inputs:
-        azureSubscription: 'kubernetes-service-connection'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          MANIFEST_PATH="$(System.ArtifactsDirectory)"
-          az aks command invoke \
-            --resource-group MultiAgentDataVisual \
-            --name Multiagent_AKS \
-            --command "kubectl apply -f $MANIFEST_PATH/mcp-client-deployment.yaml"
-          az aks command invoke \
-            --resource-group MultiAgentDataVisual \
-            --name Multiagent_AKS \
-            --command "kubectl apply -f $MANIFEST_PATH/mcp-client-service.yaml"
+    # - task: AzureCLI@2
+    #   displayName: 'Deploy mcp-client'
+    #   inputs:
+    #     azureSubscription: 'kubernetes-service-connection'
+    #     scriptType: 'bash'
+    #     scriptLocation: 'inlineScript'
+    #     inlineScript: |
+    #       MANIFEST_PATH="$(System.ArtifactsDirectory)"
+    #       az aks command invoke \
+    #         --resource-group MultiAgentDataVisual \
+    #         --name Multiagent_AKS \
+    #         --command "kubectl apply -f $MANIFEST_PATH/mcp-client-deployment.yaml"
+    #       az aks command invoke \
+    #         --resource-group MultiAgentDataVisual \
+    #         --name Multiagent_AKS \
+    #         --command "kubectl apply -f $MANIFEST_PATH/mcp-client-service.yaml"
 
-    - task: AzureCLI@2
-      displayName: 'Deploy mcp-frontend'
-      inputs:
-        azureSubscription: 'kubernetes-service-connection'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          MANIFEST_PATH="$(System.ArtifactsDirectory)"
-          az aks command invoke \
-            --resource-group MultiAgentDataVisual \
-            --name Multiagent_AKS \
-            --command "kubectl apply -f $MANIFEST_PATH/mcp-frontend-deployment.yaml"
-          az aks command invoke \
-            --resource-group MultiAgentDataVisual \
-            --name Multiagent_AKS \
-            --command "kubectl apply -f $MANIFEST_PATH/mcp-frontend-service.yaml"
+    # - task: AzureCLI@2
+    #   displayName: 'Deploy mcp-frontend'
+    #   inputs:
+    #     azureSubscription: 'kubernetes-service-connection'
+    #     scriptType: 'bash'
+    #     scriptLocation: 'inlineScript'
+    #     inlineScript: |
+    #       MANIFEST_PATH="$(System.ArtifactsDirectory)"
+    #       az aks command invoke \
+    #         --resource-group MultiAgentDataVisual \
+    #         --name Multiagent_AKS \
+    #         --command "kubectl apply -f $MANIFEST_PATH/mcp-frontend-deployment.yaml"
+    #       az aks command invoke \
+    #         --resource-group MultiAgentDataVisual \
+    #         --name Multiagent_AKS \
+    #         --command "kubectl apply -f $MANIFEST_PATH/mcp-frontend-service.yaml"
