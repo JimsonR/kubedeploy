@@ -1,18 +1,12 @@
-# trigger:
-# - main
-# Stage 1
-# Build docker image 
-# Publish the K8S Files
-
-resources:
-- repo: self
+trigger:
+  - main
 
 variables:
   tag:  'latest'
   azmcpserverImage: 'eswarchivatam/azmcpserver:$(tag)'
   mcpclientImage:  'eswarchivatam/mcpclient:$(tag)'
   mcpfrontendImage: 'eswarchivatam/mcpfrontend:$(tag)'
-  k8sNamespace: 'default'
+  k8sNamespace: 'mcp-app'
 
 stages:
 - stage: KubernetesManifests
@@ -22,7 +16,6 @@ stages:
     displayName: Copy kubernetes manifests
     pool:
       vmImage: ubuntu-latest
-      # name: Test Agent
     steps:
       - task: CopyFiles@2
         displayName: 'Copy Kubernetes Manifests'
@@ -35,8 +28,8 @@ stages:
         inputs:
           PathtoPublish: '$(Build.ArtifactStagingDirectory)'
           ArtifactName: 'manifests'
-          publishLocation: 'Container'  # Stage 1 is done 
-          
+          publishLocation: 'Container'
+
 - stage: Deploy
   displayName: Deploy image
   jobs:
@@ -44,8 +37,7 @@ stages:
     displayName: Deploy
     pool:
       vmImage: ubuntu-latest
-      # name: Test Agent
-    steps:  
+    steps:
     - task: DownloadPipelineArtifact@2
       displayName: 'Download Manifests'
       inputs:
@@ -54,59 +46,73 @@ stages:
         itemPattern: '**/*.yaml'
         targetPath: '$(System.ArtifactsDirectory)/manifests'
 
+    - task: AzureCLI@2
+      displayName: 'Create/Update Kubernetes Namespace and Secrets'
+      inputs:
+        azureSubscription: 'kubernetes-service-connection' # <-- Replace with your Azure Resource Manager connection name
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl create namespace $(k8sNamespace) --dry-run=client -o yaml | kubectl apply -f -"
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl create secret generic azure-sql-secret -n $(k8sNamespace) --from-literal=password=$AZURE_SQL_PASSWORD --dry-run=client -o yaml | kubectl apply -f -"
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl create secret generic azure-openai-secret -n $(k8sNamespace) --from-literal=api-key=$AZURE_OPENAI_API_KEY --dry-run=client -o yaml | kubectl apply -f -"
+      env:
+        AZURE_SQL_PASSWORD: $(AZURE_SQL_PASSWORD)
+        AZURE_OPENAI_API_KEY: $(AZURE_OPENAI_API_KEY)
 
-    - task: KubernetesManifest@1
+    - task: AzureCLI@2
       displayName: 'Deploy azmcpserver'
       inputs:
-        action: 'deploy'
-        connectionType: 'kubernetesServiceConnection'
-        kubernetesServiceConnection: 'az'
-        namespace: '$(k8sNamespace)'
-        manifests: '$(System.ArtifactsDirectory)/manifests/backend-*.yaml'
-        containers: '$(backendImage)'
+        azureSubscription: 'kubernetes-service-connection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl apply -f $(System.ArtifactsDirectory)/manifests/azmcpserver-deployment.yaml"
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl apply -f $(System.ArtifactsDirectory)/manifests/azmcpserver-service.yaml"
 
-
-        # secretArguments: |
-        #   --set secrets.azureStorageKey=$(AZURE_STORAGE_KEY) \
-        #   --set secrets.azureCosmosKey=$(AZURE_COSMOS_KEY)
-            # Verification Step
-    # - task: Bash@3
-    #   displayName: 'Verify Backend'
-    #   inputs:
-    #     targetType: 'inline'
-    #     script: |
-    #       echo "Checking backend status..."
-    #       kubectl get pods -l app=ssgenerals-backend -o wide
-    #       kubectl logs -l app=ssgenerals-backend --tail=50
-    #       echo "Proceeding with deployment..."
-    - task: KubernetesManifest@1
-      displayName: 'Deploy frontend'
+    - task: AzureCLI@2
+      displayName: 'Deploy mcp-client'
       inputs:
-        action: 'deploy'
-        connectionType: 'kubernetesServiceConnection'
-        kubernetesServiceConnection: 'azure-kubernetes-ssgenerals-connenction'
-        namespace: '$(k8sNamespace)'
-        manifests: '$(System.ArtifactsDirectory)/manifests/frontend-*.yaml'
-        containers: '$(frontendImage)'
-        arguments: '--timeout=300s'
+        azureSubscription: 'kubernetes-service-connection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl apply -f $(System.ArtifactsDirectory)/manifests/mcp-client-deployment.yaml"
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl apply -f $(System.ArtifactsDirectory)/manifests/mcp-client-service.yaml"
 
-    # Get Frontend Service URL
-    # - task: Bash@3
-    #   displayName: 'Get Frontend URL'
-    #   inputs:
-    #     targetType: 'inline'
-    #     script: |
-    #       kubectl get svc frontend -n $(k8sNamespace) -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
-    #       echo "##vso[task.setvariable variable=frontendUrl]http://$(kubectl get svc frontend -n $(k8sNamespace) -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
-    
-    #       # Output the Frontend URL
-    #       - script: echo "Frontend is available at: $(frontendUrl)"
-    #         displayName: 'Display Frontend URL'
-
-
-# Stage 2
-# Build docker image 
-# Deploy to K8S Cluster with Docker Image
-
-
-
+    - task: AzureCLI@2
+      displayName: 'Deploy mcp-frontend'
+      inputs:
+        azureSubscription: 'kubernetes-service-connection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl apply -f $(System.ArtifactsDirectory)/manifests/mcp-frontend-deployment.yaml"
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl apply -f $(System.ArtifactsDirectory)/manifests/mcp-frontend-service.yaml"
