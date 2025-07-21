@@ -88,7 +88,7 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          MANIFEST_PATH="$(System.ArtifactsDirectory)/manifests"
+          MANIFEST_PATH="$(System.ArtifactsDirectory)"
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
@@ -105,7 +105,7 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          MANIFEST_PATH="$(System.ArtifactsDirectory)/manifests"
+          MANIFEST_PATH="$(System.ArtifactsDirectory)"
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
@@ -122,7 +122,7 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          MANIFEST_PATH="$(System.ArtifactsDirectory)/manifests"
+          MANIFEST_PATH="$(System.ArtifactsDirectory)"
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
