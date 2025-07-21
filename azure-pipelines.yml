@@ -70,7 +70,9 @@ stages:
       env:
         AZURE_SQL_PASSWORD: $(AZURE_SQL_PASSWORD)
         AZURE_OPENAI_API_KEY: $(AZURE_OPENAI_API_KEY)
-
+      
+    - script: ls -lR $(System.ArtifactsDirectory)/manifests
+      displayName: 'List downloaded manifests'
     - task: AzureCLI@2
       displayName: 'Deploy azmcpserver'
       inputs:
