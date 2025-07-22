@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: mcp-client
-        image: mcpclient
+        image: eswarchivatam/mcpclient:latest
         ports:
         - containerPort: 8080
         env:

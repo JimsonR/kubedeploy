@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: mcp-frontend
-        image: mcp-frontend
+        image: eswarchivatam/mcp-frontend:latest
         ports:
         - containerPort: 80
         resources:

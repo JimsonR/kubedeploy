@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: azmcpserver
-        image: azdbmcpserver
+        image: eswarchivatam/azmcpserver:latest
         ports:
         - containerPort: 8005
         env:
