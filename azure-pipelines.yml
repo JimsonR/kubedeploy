@@ -96,7 +96,7 @@ stages:
         mkdir -p $HOME/.local/bin
         # Use a specific version, e.g., v0.1.1 (replace with the latest if needed)
         KUBELOGIN_VERSION="v0.2.10"
-        curl -L -o $HOME/.local/bin/kubelogin https://github.com/Azure/kubelogin/releases/download/$(KUBELOGIN_VERSION)/kubelogin-linux-amd64.zip/
+        curl -L -o $HOME/.local/bin/kubelogin https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip/
         chmod +x $HOME/.local/bin/kubelogin
         file $HOME/.local/bin/kubelogin
         ls -lh $HOME/.local/bin/kubelogin
