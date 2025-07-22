@@ -100,7 +100,9 @@ stages:
       displayName: 'Install kubelogin (amd64)'
     - script: |
         mkdir -p $HOME/.local/bin
-        az aks install-cli --install-location $HOME/.local/bin/kubectl
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        mv kubectl $HOME/.local/bin/
         echo "##vso[task.setvariable variable=PATH]$HOME/.local/bin:$PATH"
       displayName: 'Install kubectl (user local bin)'
 
