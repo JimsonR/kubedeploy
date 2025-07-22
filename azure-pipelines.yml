@@ -90,7 +90,7 @@ stages:
         mv kubectl $HOME/.local/bin/
         echo "##vso[task.setvariable variable=PATH]$HOME/.local/bin:$PATH"
       displayName: 'Install kubectl (user local bin)'
-
+      
     - script: |
         rm -f $HOME/.local/bin/kubelogin
         mkdir -p $HOME/.local/bin
@@ -98,7 +98,8 @@ stages:
         curl -Lo $HOME/.local/bin/kubelogin https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64
         chmod +x $HOME/.local/bin/kubelogin
         file $HOME/.local/bin/kubelogin
-        echo "##vso[task.setvariable variable
+        echo "##vso[task.setvariable variable=PATH]$HOME/.local/bin:$PATH"
+      displayName: 'Install kubelogin (amd64, robust)'
 
     - task: AzureCLI@2
       displayName: 'Get AKS Credentials'
