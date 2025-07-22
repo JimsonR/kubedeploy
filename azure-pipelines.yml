@@ -81,6 +81,16 @@ stages:
       env:
         AZURE_SQL_PASSWORD: $(AZURE_SQL_PASSWORD)
         AZURE_OPENAI_API_KEY: $(AZURE_OPENAI_API_KEY)
+
+
+    - task: AzureCLI@2
+      displayName: 'Get AKS Credentials'
+      inputs:
+        azureSubscription: 'kubernetes-service-connection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az aks get-credentials --resource-group MultiAgentDataVisual --name Multiagent_AKS --overwrite-existing
     - script: |
         mkdir -p $HOME/.local/bin
         az aks install-cli --install-location $HOME/.local/bin/kubectl
@@ -94,16 +104,6 @@ stages:
         chmod +x $HOME/.local/bin/kubelogin
         echo "##vso[task.setvariable variable=PATH]$HOME/.local/bin:$PATH"
       displayName: 'Install kubelogin (amd64)'
-
-    - task: AzureCLI@2
-      displayName: 'Get AKS Credentials'
-      inputs:
-        azureSubscription: 'kubernetes-service-connection'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          az aks get-credentials --resource-group MultiAgentDataVisual --name Multiagent_AKS --overwrite-existing
-
     - script: |
         kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-deployment.yaml
         kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-service.yaml
