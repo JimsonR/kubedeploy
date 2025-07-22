@@ -128,7 +128,7 @@ stages:
     # - script: |
     #     kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-deployment.yaml
     #     kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-service.yaml
-    #   displayName: 'Deploy mcp-client'    kubectl describe pod azmcpserver-54589945b4-kft8l
+    #   displayName: 'Deploy mcp-client'
 
     # - script: |
     #     kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-deployment.yaml
