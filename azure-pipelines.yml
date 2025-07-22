@@ -1,5 +1,5 @@
-trigger:
-  - main
+# trigger:
+#   - main
 
 variables:
   tag:  'latest'
@@ -114,6 +114,10 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           az aks get-credentials --resource-group MultiAgentDataVisual --name Multiagent_AKS --overwrite-existing
+          kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-deployment.yaml
+          kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-service.yaml
+          kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-deployment.yaml
+          kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-service.yaml
           kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-deployment.yaml
           kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-service.yaml
     # - script: |
