@@ -120,20 +120,20 @@ stages:
           kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-service.yaml
           kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-deployment.yaml
           kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-service.yaml
-    # - script: |
-    #     kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-deployment.yaml
-    #     kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-service.yaml
-    #   displayName: 'Deploy azmcpserver'
+    - script: |
+        kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-deployment.yaml
+        kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-service.yaml
+      displayName: 'Deploy azmcpserver'
 
-    # - script: |
-    #     kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-deployment.yaml
-    #     kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-service.yaml
-    #   displayName: 'Deploy mcp-client'
+    - script: |
+        kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-deployment.yaml
+        kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-service.yaml
+      displayName: 'Deploy mcp-client'
 
-    # - script: |
-    #     kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-deployment.yaml
-    #     kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-service.yaml
-    #   displayName: 'Deploy mcp-frontend'
+    - script: |
+        kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-deployment.yaml
+        kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-service.yaml
+      displayName: 'Deploy mcp-frontend'
     - task: AzureCLI@2
       displayName: 'Show Frontend Service Endpoint'
       inputs:
