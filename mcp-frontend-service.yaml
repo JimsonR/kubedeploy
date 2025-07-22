@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mcp-frontend-service
+  name: mcp-frontend
   namespace: mcp-app
   labels:
     app: mcp-frontend
