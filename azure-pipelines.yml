@@ -94,12 +94,14 @@ stages:
     - script: |
         rm -f $HOME/.local/bin/kubelogin
         mkdir -p $HOME/.local/bin
-        curl -L -o $HOME/.local/bin/kubelogin https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-linux-amd64
+        # Use a specific version, e.g., v0.1.1 (replace with the latest if needed)
+        KUBELOGIN_VERSION="v0.2.10"
+        curl -L -o $HOME/.local/bin/kubelogin https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64
         chmod +x $HOME/.local/bin/kubelogin
         file $HOME/.local/bin/kubelogin
         ls -lh $HOME/.local/bin/kubelogin
         echo "##vso[task.setvariable variable=PATH]$HOME/.local/bin:$PATH"
-      displayName: 'Install kubelogin (amd64, follow redirects)'
+      displayName: 'Install kubelogin (amd64, pinned version)'
 
     - task: AzureCLI@2
       displayName: 'Get AKS Credentials'
