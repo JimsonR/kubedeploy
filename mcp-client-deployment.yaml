@@ -32,6 +32,16 @@ spec:
           value: "gpt-4o"
         - name: AZURE_OPENAI_API_VERSION
           value: "2024-02-15-preview"
+        - name: REDIS_HOST
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: host
+        - name: REDIS_PORT
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: port
         resources:
           requests:
             memory: "256Mi"

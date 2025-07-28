@@ -115,6 +115,10 @@ stages:
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
             --command "kubectl create secret generic azure-openai-secret -n $(k8sNamespace) --from-literal=api-key=$AZURE_OPENAI_API_KEY --dry-run=client -o yaml | kubectl apply -f -"
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl create secret generic redis-secret -n $(k8sNamespace) --from-literal=host=$REDIS_HOST --from-literal=port=$REDIS_PORT --dry-run=client -o yaml | kubectl apply -f -"
       env:
         AZURE_SQL_PASSWORD: $(AZURE_SQL_PASSWORD)
         AZURE_OPENAI_API_KEY: $(AZURE_OPENAI_API_KEY)
