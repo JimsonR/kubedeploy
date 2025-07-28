@@ -120,6 +120,8 @@ stages:
           kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-service.yaml
           kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-deployment.yaml
           kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-service.yaml
+          kubectl apply -f $(System.ArtifactsDirectory)/redis-deployment.yaml
+          kubectl apply -f $(System.ArtifactsDirectory)/redis-service.yaml
     # - script: |
     #     kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-deployment.yaml
     #     kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-service.yaml
