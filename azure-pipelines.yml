@@ -81,6 +81,8 @@ stages:
       env:
         AZURE_SQL_PASSWORD: $(AZURE_SQL_PASSWORD)
         AZURE_OPENAI_API_KEY: $(AZURE_OPENAI_API_KEY)
+        REDIS_HOST: $(REDIS_HOST)
+        REDIS_PORT: $(REDIS_PORT)
 
 
     - script: |
