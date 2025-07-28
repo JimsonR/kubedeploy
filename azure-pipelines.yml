@@ -114,6 +114,11 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           az aks get-credentials --resource-group MultiAgentDataVisual --name Multiagent_AKS --overwrite-existing
+          kubectl delete deployment --all -n $(k8sNamespace)
+          kubectl delete service --all -n $(k8sNamespace)
+          kubectl delete pod --all -n $(k8sNamespace)
+          kubectl delete secret --all -n $(k8sNamespace)
+          kubectl delete configmap --all -n $(k8sNamespace)
           kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-deployment.yaml
           kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-service.yaml
           kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-deployment.yaml
