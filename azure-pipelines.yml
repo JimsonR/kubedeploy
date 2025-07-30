@@ -59,31 +59,8 @@ stages:
           ls -la "$(System.ArtifactsDirectory)/manifests" || echo "manifests folder not found"
 
 
-    - script: |
-        mkdir -p $HOME/.local/bin
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        chmod +x kubectl
-        mv kubectl $HOME/.local/bin/
-        echo "##vso[task.setvariable variable=PATH]$HOME/.local/bin:$PATH"
-      displayName: 'Install kubectl (user local bin)'
-    - script: |
-        sudo apt-get update
-        sudo apt-get install -y unzip
-      displayName: 'Install unzip'
-
-    - script: |
-        rm -f $HOME/.local/bin/kubelogin
-        mkdir -p $HOME/.local/bin
-        KUBELOGIN_VERSION="v0.2.10"
-        curl -L -o kubelogin.zip https://github.com/Azure/kubelogin/releases/download/${KUBELOGIN_VERSION}/kubelogin-linux-amd64.zip
-        unzip -j kubelogin.zip -d $HOME/.local/bin/
-        chmod +x $HOME/.local/bin/kubelogin
-        file $HOME/.local/bin/kubelogin
-        ls -lh $HOME/.local/bin/kubelogin
-        echo "##vso[task.setvariable variable=PATH]$HOME/.local/bin:$PATH"
-      displayName: 'Install kubelogin (amd64, unzip)'
     - task: AzureCLI@2
-      displayName: 'Get AKS Credentials and Clean Namespace'
+      displayName: 'Clean Namespace'
       inputs:
         azureSubscription: 'kubernetes-service-connection'
         scriptType: 'bash'
@@ -91,15 +68,30 @@ stages:
         inlineScript: |
           az aks get-credentials --resource-group MultiAgentDataVisual --name Multiagent_AKS --overwrite-existing --admin
           echo "Deleting deployments..."
-          kubectl delete deployment --all -n $(k8sNamespace) --timeout=60s --grace-period=10 || true
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl delete deployment --all -n $(k8sNamespace) --timeout=60s --grace-period=10" || true
           echo "Deleting services..."
-          kubectl delete service --all -n $(k8sNamespace) --timeout=30s || true
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl delete service --all -n $(k8sNamespace) --timeout=30s" || true
           echo "Force deleting pods..."
-          kubectl delete pod --all -n $(k8sNamespace) --timeout=60s --grace-period=0 --force || true
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl delete pod --all -n $(k8sNamespace) --timeout=60s --grace-period=0 --force" || true
           echo "Deleting secrets..."
-          kubectl delete secret --all -n $(k8sNamespace) --timeout=30s || true
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl delete secret --all -n $(k8sNamespace) --timeout=30s" || true
           echo "Deleting configmaps..."
-          kubectl delete configmap --all -n $(k8sNamespace) --timeout=30s || true
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl delete configmap --all -n $(k8sNamespace) --timeout=30s" || true
           echo "Cleanup completed."
 
     - task: AzureCLI@2
@@ -138,14 +130,46 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-deployment.yaml
-          kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-service.yaml
-          kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-deployment.yaml
-          kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-service.yaml
-          kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-deployment.yaml
-          kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-service.yaml
-          kubectl apply -f $(System.ArtifactsDirectory)/redis-deployment.yaml
-          kubectl apply -f $(System.ArtifactsDirectory)/redis-service.yaml
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl apply -f -" \
+            --file $(System.ArtifactsDirectory)/azmcpserver-deployment.yaml
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl apply -f -" \
+            --file $(System.ArtifactsDirectory)/azmcpserver-service.yaml
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl apply -f -" \
+            --file $(System.ArtifactsDirectory)/mcp-client-deployment.yaml
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl apply -f -" \
+            --file $(System.ArtifactsDirectory)/mcp-client-service.yaml
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl apply -f -" \
+            --file $(System.ArtifactsDirectory)/mcp-frontend-deployment.yaml
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl apply -f -" \
+            --file $(System.ArtifactsDirectory)/mcp-frontend-service.yaml
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl apply -f -" \
+            --file $(System.ArtifactsDirectory)/redis-deployment.yaml
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl apply -f -" \
+            --file $(System.ArtifactsDirectory)/redis-service.yaml
     # - script: |
     #     kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-deployment.yaml
     #     kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-service.yaml
@@ -167,5 +191,8 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          kubectl get svc -n $(k8sNamespace) | grep mcp-frontend-service || true
-          echo "If EXTERNAL-IP is pending, wait a minute and re-run: kubectl get svc -n $(k8sNamespace)"
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl get svc -n $(k8sNamespace)"
+          echo "If EXTERNAL-IP is pending, wait a minute and re-run the above command"
