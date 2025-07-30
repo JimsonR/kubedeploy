@@ -89,7 +89,7 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          az aks get-credentials --resource-group MultiAgentDataVisual --name Multiagent_AKS --overwrite-existing
+          az aks get-credentials --resource-group MultiAgentDataVisual --name Multiagent_AKS --overwrite-existing --admin
           echo "Deleting deployments..."
           kubectl delete deployment --all -n $(k8sNamespace) --timeout=60s --grace-period=10 || true
           echo "Deleting services..."
