@@ -117,11 +117,18 @@ stages:
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
             --command "kubectl create secret generic redis-secret -n $(k8sNamespace) --from-literal=host=$REDIS_HOST --from-literal=port=$REDIS_PORT --dry-run=client -o yaml | kubectl apply -f -"
+          az aks command invoke \
+            --resource-group MultiAgentDataVisual \
+            --name Multiagent_AKS \
+            --command "kubectl create secret generic aws-secret -n $(k8sNamespace) --from-literal=AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID --from-literal=AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY --from-literal=AWS_REGION=$AWS_REGION --dry-run=client -o yaml | kubectl apply -f -"
       env:
         AZURE_SQL_PASSWORD: $(AZURE_SQL_PASSWORD)
         AZURE_OPENAI_API_KEY: $(AZURE_OPENAI_API_KEY)
         REDIS_HOST: $(REDIS_HOST)
         REDIS_PORT: $(REDIS_PORT)
+        AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+        AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+        AWS_REGION: $(AWS_REGION)
 
     - task: AzureCLI@2
       displayName: 'Deploy Kubernetes Manifests'

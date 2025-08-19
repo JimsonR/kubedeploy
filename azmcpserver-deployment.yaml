@@ -32,8 +32,25 @@ spec:
             secretKeyRef:
               name: azure-sql-secret
               key: password
+        
         - name: AZURE_SQL_DRIVER
           value: "{ODBC Driver 17 for SQL Server}"
+        # AWS Credentials from secret
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-secret
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-secret
+              key: AWS_SECRET_ACCESS_KEY
+        - name: AWS_REGION
+          valueFrom:
+            secretKeyRef:
+              name: aws-secret
+              key: AWS_REGION
         resources:
           requests:
             memory: "128Mi"
