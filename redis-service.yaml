@@ -2,11 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis
-  namespace: rag-apprsion: v1
-kind: Service
-metadata:
-  name: redis
-  namespace: mcp-app
+  namespace: rag-app
 spec:
   selector:
     app: redis
