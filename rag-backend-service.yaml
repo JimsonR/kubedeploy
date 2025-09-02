@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: rag-backend-service
+  name: backend
   namespace: rag-app
   labels:
     app: rag-backend
@@ -12,4 +12,4 @@ spec:
     - protocol: TCP
       port: 8000
       targetPort: 8000
-  type: LoadBalancer
+  type: ClusterIP
