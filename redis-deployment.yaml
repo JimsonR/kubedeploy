@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
-  namespace: mcp-app
+  namespace: rag-app
 spec:
   selector:
     matchLabels:

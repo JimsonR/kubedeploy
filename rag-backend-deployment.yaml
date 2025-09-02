@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rag-backend
+  namespace: rag-app
+  labels:
+    app: rag-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rag-backend
+  template:
+    metadata:
+      labels:
+        app: rag-backend
+    spec:
+      containers:
+      - name: rag-backend
+        image: eswarchivatam/ragbackend:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: AZURE_OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: azure-openai-secret
+              key: api-key
+        - name: AZURE_OPENAI_ENDPOINT
+          value: "https://chb-az-openai.openai.azure.com/"
+        - name: AZURE_OPENAI_DEPLOYMENT_NAME
+          value: "gpt-4o"
+        - name: AZURE_OPENAI_API_VERSION
+          value: "2024-02-15-preview"
+        - name: REDIS_HOST
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: host
+        - name: REDIS_PORT
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: port
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-secret
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-secret
+              key: AWS_SECRET_ACCESS_KEY
+        - name: AWS_REGION
+          valueFrom:
+            secretKeyRef:
+              name: aws-secret
+              key: AWS_REGION
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

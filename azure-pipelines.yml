@@ -6,7 +6,10 @@ variables:
   azmcpserverImage: 'eswarchivatam/azmcpserver:$(tag)'
   mcpclientImage:  'eswarchivatam/mcpclient:$(tag)'
   mcpfrontendImage: 'eswarchivatam/mcpfrontend:$(tag)'
+  ragfrontendImage: 'eswarchivatam/ragfrontend:$(tag)'
+  ragbackendImage: 'eswarchivatam/ragbackend:$(tag)'
   k8sNamespace: 'mcp-app'
+  ragNamespace: 'rag-app'
 
 stages:
 - stage: KubernetesManifests
@@ -67,31 +70,58 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           az aks get-credentials --resource-group MultiAgentDataVisual --name Multiagent_AKS --overwrite-existing --admin
-          echo "Deleting deployments..."
+          # echo "Cleaning MCP namespace..."
+          # echo "Deleting deployments..."
+          # az aks command invoke \
+          #   --resource-group MultiAgentDataVisual \
+          #   --name Multiagent_AKS \
+          #   --command "kubectl delete deployment --all -n $(k8sNamespace) --timeout=60s --grace-period=10" || true
+          # echo "Deleting services..."
+          # az aks command invoke \
+          #   --resource-group MultiAgentDataVisual \
+          #   --name Multiagent_AKS \
+          #   --command "kubectl delete service --all -n $(k8sNamespace) --timeout=30s" || true
+          # echo "Force deleting pods..."
+          # az aks command invoke \
+          #   --resource-group MultiAgentDataVisual \
+          #   --name Multiagent_AKS \
+          #   --command "kubectl delete pod --all -n $(k8sNamespace) --timeout=60s --grace-period=0 --force" || true
+          # echo "Deleting secrets..."
+          # az aks command invoke \
+          #   --resource-group MultiAgentDataVisual \
+          #   --name Multiagent_AKS \
+          #   --command "kubectl delete secret --all -n $(k8sNamespace) --timeout=30s" || true
+          # echo "Deleting configmaps..."
+          # az aks command invoke \
+          #   --resource-group MultiAgentDataVisual \
+          #   --name Multiagent_AKS \
+          #   --command "kubectl delete configmap --all -n $(k8sNamespace) --timeout=30s" || true
+          echo "Cleaning RAG namespace..."
+          echo "Deleting RAG deployments..."
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl delete deployment --all -n $(k8sNamespace) --timeout=60s --grace-period=10" || true
-          echo "Deleting services..."
+            --command "kubectl delete deployment --all -n $(ragNamespace) --timeout=60s --grace-period=10" || true
+          echo "Deleting RAG services..."
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl delete service --all -n $(k8sNamespace) --timeout=30s" || true
-          echo "Force deleting pods..."
+            --command "kubectl delete service --all -n $(ragNamespace) --timeout=30s" || true
+          echo "Force deleting RAG pods..."
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl delete pod --all -n $(k8sNamespace) --timeout=60s --grace-period=0 --force" || true
-          echo "Deleting secrets..."
+            --command "kubectl delete pod --all -n $(ragNamespace) --timeout=60s --grace-period=0 --force" || true
+          echo "Deleting RAG secrets..."
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl delete secret --all -n $(k8sNamespace) --timeout=30s" || true
-          echo "Deleting configmaps..."
+            --command "kubectl delete secret --all -n $(ragNamespace) --timeout=30s" || true
+          echo "Deleting RAG configmaps..."
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl delete configmap --all -n $(k8sNamespace) --timeout=30s" || true
+            --command "kubectl delete configmap --all -n $(ragNamespace) --timeout=30s" || true
           echo "Cleanup completed."
 
     - task: AzureCLI@2
@@ -101,26 +131,44 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
+          # echo "Creating MCP namespace and secrets..."
+          # az aks command invoke \
+          #   --resource-group MultiAgentDataVisual \
+          #   --name Multiagent_AKS \
+          #   --command "kubectl create namespace $(k8sNamespace) --dry-run=client -o yaml | kubectl apply -f -"
+          # az aks command invoke \
+          #   --resource-group MultiAgentDataVisual \
+          #   --name Multiagent_AKS \
+          #   --command "kubectl create secret generic azure-sql-secret -n $(k8sNamespace) --from-literal=password=$AZURE_SQL_PASSWORD --dry-run=client -o yaml | kubectl apply -f -"
+          # az aks command invoke \
+          #   --resource-group MultiAgentDataVisual \
+          #   --name Multiagent_AKS \
+          #   --command "kubectl create secret generic azure-openai-secret -n $(k8sNamespace) --from-literal=api-key=$AZURE_OPENAI_API_KEY --dry-run=client -o yaml | kubectl apply -f -"
+          # az aks command invoke \
+          #   --resource-group MultiAgentDataVisual \
+          #   --name Multiagent_AKS \
+          #   --command "kubectl create secret generic redis-secret -n $(k8sNamespace) --from-literal=host=$REDIS_HOST --from-literal=port=$REDIS_PORT --dry-run=client -o yaml | kubectl apply -f -"
+          # az aks command invoke \
+          #   --resource-group MultiAgentDataVisual \
+          #   --name Multiagent_AKS \
+          #   --command "kubectl create secret generic aws-secret -n $(k8sNamespace) --from-literal=AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID --from-literal=AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY --from-literal=AWS_REGION=$AWS_REGION --dry-run=client -o yaml | kubectl apply -f -"
+          echo "Creating RAG namespace and secrets..."
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl create namespace $(k8sNamespace) --dry-run=client -o yaml | kubectl apply -f -"
+            --command "kubectl create namespace $(ragNamespace) --dry-run=client -o yaml | kubectl apply -f -"
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl create secret generic azure-sql-secret -n $(k8sNamespace) --from-literal=password=$AZURE_SQL_PASSWORD --dry-run=client -o yaml | kubectl apply -f -"
+            --command "kubectl create secret generic azure-openai-secret -n $(ragNamespace) --from-literal=api-key=$AZURE_OPENAI_API_KEY --dry-run=client -o yaml | kubectl apply -f -"
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl create secret generic azure-openai-secret -n $(k8sNamespace) --from-literal=api-key=$AZURE_OPENAI_API_KEY --dry-run=client -o yaml | kubectl apply -f -"
+            --command "kubectl create secret generic redis-secret -n $(ragNamespace) --from-literal=host=$REDIS_HOST --from-literal=port=$REDIS_PORT --dry-run=client -o yaml | kubectl apply -f -"
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl create secret generic redis-secret -n $(k8sNamespace) --from-literal=host=$REDIS_HOST --from-literal=port=$REDIS_PORT --dry-run=client -o yaml | kubectl apply -f -"
-          az aks command invoke \
-            --resource-group MultiAgentDataVisual \
-            --name Multiagent_AKS \
-            --command "kubectl create secret generic aws-secret -n $(k8sNamespace) --from-literal=AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID --from-literal=AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY --from-literal=AWS_REGION=$AWS_REGION --dry-run=client -o yaml | kubectl apply -f -"
+            --command "kubectl create secret generic aws-secret -n $(ragNamespace) --from-literal=AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID --from-literal=AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY --from-literal=AWS_REGION=$AWS_REGION --dry-run=client -o yaml | kubectl apply -f -"
       env:
         AZURE_SQL_PASSWORD: $(AZURE_SQL_PASSWORD)
         AZURE_OPENAI_API_KEY: $(AZURE_OPENAI_API_KEY)
@@ -137,12 +185,16 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-deployment.yaml
-          kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-service.yaml
-          kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-deployment.yaml
-          kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-service.yaml
-          kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-deployment.yaml
-          kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-service.yaml
+          # kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-deployment.yaml
+          # kubectl apply -f $(System.ArtifactsDirectory)/azmcpserver-service.yaml
+          # kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-deployment.yaml
+          # kubectl apply -f $(System.ArtifactsDirectory)/mcp-client-service.yaml
+          # kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-deployment.yaml
+          # kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-service.yaml
+          kubectl apply -f $(System.ArtifactsDirectory)/rag-backend-deployment.yaml
+          kubectl apply -f $(System.ArtifactsDirectory)/rag-backend-service.yaml
+          kubectl apply -f $(System.ArtifactsDirectory)/rag-frontend-deployment.yaml
+          kubectl apply -f $(System.ArtifactsDirectory)/rag-frontend-service.yaml
           kubectl apply -f $(System.ArtifactsDirectory)/redis-deployment.yaml
           kubectl apply -f $(System.ArtifactsDirectory)/redis-service.yaml
     # - script: |
@@ -160,14 +212,20 @@ stages:
     #     kubectl apply -f $(System.ArtifactsDirectory)/mcp-frontend-service.yaml
     #   displayName: 'Deploy mcp-frontend'
     - task: AzureCLI@2
-      displayName: 'Show Frontend Service Endpoint'
+      displayName: 'Show RAG Service Endpoints'
       inputs:
         azureSubscription: 'kubernetes-service-connection'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
+          # echo "MCP Services:"
+          # az aks command invoke \
+          #   --resource-group MultiAgentDataVisual \
+          #   --name Multiagent_AKS \
+          #   --command "kubectl get svc -n $(k8sNamespace)"
+          echo "RAG Services:"
           az aks command invoke \
             --resource-group MultiAgentDataVisual \
             --name Multiagent_AKS \
-            --command "kubectl get svc -n $(k8sNamespace)"
+            --command "kubectl get svc -n $(ragNamespace)"
           echo "If EXTERNAL-IP is pending, wait a minute and re-run the above command"
